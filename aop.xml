@@ -1,0 +1,20 @@
+<aspectwerkz>
+	<system id="tests">
+		<package name="com.bea.drips.framework.aspects.timing">
+			<aspect class="TimingAspect">
+				<deployment-scope name="scope1" expression="execution(public void ..WordCounter.*(..))"/>
+				<deployment-scope name="scope2" expression="execution(public void HelloWorldExample.*(..))"/>
+			</aspect>
+		</package>
+		<package name="com.bea.drips.framework.aspects.testextendedaspect">
+			<aspect class="ExtendedAspect"/>
+		</package>
+		<!--<package name="com.bea.drips.example.wordcount.stats">
+			<aspect class="WordCounterStatsAspect">
+				<advice name="doWCDataExtraction(JoinPoint jp,String filename)"
+                        type="around"
+                        bind-to="execution(public int ..WordCounter.runcounter(String)) AND args(filename)"/>
+			</aspect>
+		</package> -->
+	</system>
+</aspectwerkz>

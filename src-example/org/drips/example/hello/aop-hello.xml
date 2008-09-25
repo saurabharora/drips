@@ -1,0 +1,5 @@
+<aspectwerkz>
+    <system id="tests">
+	   <deployment-scope name="helloWorldScope" expression="within(com.bea.drips.example.hello.HelloWorld)"/> 
+    </system>
+</aspectwerkz>

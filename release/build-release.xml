@@ -1,0 +1,134 @@
+<?xml version="1.0"?>
+<!-- ====================================================================== 
+
+     drips-release 
+     This build file is used to create the generate the binary release
+                   
+     Saurabh Arora, Prasen Mukherjee
+     ====================================================================== -->
+<project name="drips-release" default="build-release" basedir=".">
+    <description>
+            Build File to Generate Drips Releases.
+    </description>
+    <property name="release" value="DAILYBUILD" />
+    <property name="release-sourcefile.prefix" value="drips-src-${release}" />
+    <property name="release-sourcefile.zip" value="drips-src-${release}.zip" />
+    <property name="release-sourcefile.tar"
+              value="${release-sourcefile.prefix}.tar" />
+    <property name="release-sourcefile.tgz"
+              value="${release-sourcefile.prefix}.tgz" />
+
+
+
+    <!-- ================================= 
+          target: build-release              
+         ================================= -->
+    <target name="build-release"
+            depends="binary-source"
+            description="--> Creates a binary release builds">
+
+    </target>
+
+
+    <!-- - - - - - - - - - - - - - - - - - 
+          target: init                      
+         - - - - - - - - - - - - - - - - - -->
+    <target name="init">
+    </target>
+
+
+
+    <!-- ================================= 
+          target: clean-all              
+         ================================= -->
+    <target name="clean-all"
+            depends="init"
+            description="--> cleans everything"
+            unless="noclean">
+        <ant antfile="build.xml" target="clean" dir=".." inheritall="false" />
+        <ant antfile="build-test.xml"
+             target="clean"
+             dir=".."
+             inheritall="false" />
+    </target>
+
+    <!-- - - - - - - - - - - - - - - - - - 
+          target: build core and examples
+         - - - - - - - - - - - - - - - - - -->
+    <target name="build-core">
+        <ant antfile="build.xml" target="build" dir=".." inheritall="false" />
+    </target>
+
+
+    <!-- - - - - - - - - - - - - - - - - - 
+          target: build-test
+         - - - - - - - - - - - - - - - - - -->
+    <target name="build-test" depends="build-core">
+        <ant antfile="build-test.xml"
+             target="compile-tests"
+             dir=".."
+             inheritall="false" />
+    </target>
+
+
+    <!-- - - - - - - - - - - - - - - - - - 
+          target: binary-source                      
+         - - - - - - - - - - - - - - - - - -->
+    <target name="binary-source" depends="init,clean-all,build-test">
+        <delete file="${release-sourcefile.tar}" />
+        <delete file="${release-sourcefile.tgz}" />
+        <antcall target="tar-binary-source" />
+        <antcall target="zip-binary-source" />
+    </target>
+
+
+    <!-- ================================= 
+          target: tar-binary-source              
+         ================================= -->
+    <target name="tar-binary-source"
+            description="--> Create a tgz Binary source release.">
+
+        <tar destfile="${release-sourcefile.tar}">
+            <tarfileset dir=".." username="drips" group="drips">
+                <include name="**/*.java" />
+                <include name="**/*.jar" />
+                <include name="**/*.xml" />
+                <include name="**/*.mf" />
+                <include name="hello.txt" />
+                <include name="www/" />
+                <exclude name="ant_home/" />
+            </tarfileset>
+            <tarfileset dir=".." mode="755" username="drips" group="drips">
+                <include name="ant_home/bin/ant" />
+                <include name="ant_home/bin/antRun" />
+            </tarfileset>
+            <tarfileset dir=".." username="drips" group="drips">
+                <include name="ant_home/" />
+                <exclude name="ant_home/bin/ant" />
+                <exclude name="ant_home/bin/antRun" />
+            </tarfileset>
+        </tar>
+        <gzip src="${release-sourcefile.tar}"
+              destfile="${release-sourcefile.tgz}" />
+    </target>
+
+
+    <!-- ================================= 
+          target: zip-binary-source              
+         ================================= -->
+    <target name="zip-binary-source"
+            description="--> Create a Zip Binary Source.">
+        <zip destfile="${release-sourcefile.zip}">
+            <fileset dir="..">
+                <include name="**/*.java" />
+                <include name="**/*.jar" />
+                <include name="**/*.xml" />
+                <include name="**/*.mf" />
+                <include name="hello.txt" />
+                <include name="www/" />
+                <include name="ant_home/" />
+            </fileset>
+        </zip>
+    </target>
+</project>
+

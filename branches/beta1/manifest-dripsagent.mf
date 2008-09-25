@@ -1,0 +1,2 @@
+Premain-Class: org.drips.framework.main.PreMain
+Can-Redefine-Classes: false

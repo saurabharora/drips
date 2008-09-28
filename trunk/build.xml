@@ -1,0 +1,113 @@
+<?xml version="1.0"?>
+<!-- ======================================================================                                                       
+
+     drips-project    
+     Dynamic Rules based Instrumentation of Production Systems.
+                   
+     Saurabh Arora, Prasen Mukherjee
+     ====================================================================== -->
+<project name="drips-project" default="build">
+	<description>
+            Dynamic Rules based Instrumentation of Production Systems.
+    </description>
+
+	<property name="build.dir" location="target" />
+
+	<property name="src.core" location="core\src\main\java" />
+	<property name="classes.core" location="core\target\classes" />
+
+	<property name="src.ext" location="extensions\src\main\java" />
+	<property name="classes.ext" location="extensions\target\classes" />
+
+	<property name="src.example" location="example\src\main\java" />
+	<property name="classes.example" location="example\target\classes" />
+
+	<property name="debug" value="on" />
+
+	<path id="aw.classpath">
+		<fileset dir="lib">
+			<include name="*jdk5*.jar" />
+		</fileset>
+		<fileset dir="lib">
+			<include name="*.jar" />
+			<exclude name="jarjar*,*jdk14*.jar,*jdk5*.jar" />
+		</fileset>
+	</path>
+	<path id="dripsall.classpath">
+		<pathelement location="${classes.core}" />
+		<pathelement location="${classes.ext}" />
+		<pathelement location="${classes.example}" />
+	</path>
+
+	<!-- ================================= -->
+	<!-- target: compile                   -->
+	<!-- ================================= -->
+	<target name="compile" depends="init" description="Compilation of the Code for drips" >
+
+		<!-- Compile the core -->
+		<echo>Compiling .. Files in ${src.core}</echo>
+		<javac srcdir="${src.core}" destdir="${classes.core}" classpathref="aw.classpath" debug="${debug}" />
+
+		<!-- Compile the extension -->
+		<echo>Compiling .. Files in ${src.ext}</echo>
+		<javac srcdir="${src.ext}" destdir="${classes.ext}" debug="${debug}">
+			<classpath>
+				<path refid="aw.classpath" />
+				<path location="${classes.core}" />
+			</classpath>
+		</javac>
+
+		<!-- Compile the standalone examples -->
+		<echo>Compiling .. Files in ${src.example}</echo>
+		<javac srcdir="${src.example}" destdir="${classes.example}" debug="${debug}">
+			<classpath>
+				<path refid="aw.classpath" />
+				<path location="${classes.core}" />
+			</classpath>
+		</javac>
+
+	</target>
+
+	<!-- ================================= -->
+	<!-- target: build                     -->
+	<!-- ================================= -->
+	<target name="build" depends="init" >
+		<jar destfile="${build.dir}/dripsagent.jar" manifest="manifest-dripsagent.mf">
+			<fileset dir="${classes.core}" />
+			<fileset dir="${classes.ext}" />
+		</jar>
+	</target>
+
+
+	<!-- ================================= -->
+	<!-- target: init                      -->
+	<!-- ================================= -->
+	<target name="init">
+		<!--<condition property="jdk15">
+			<contains string="${java.version}" substring="1.5" />
+		</condition>
+		<fail message="Please use only jdk 1.5" unless="jdk15" />
+		-->
+		<mkdir dir="${build.dir}" />
+		<!--
+		<mkdir dir="${classes.core}" />
+		<mkdir dir="${classes.example}" />
+		<mkdir dir="${classes.ext}" />
+		-->
+	</target>
+
+
+	<!-- ================================= -->
+	<!-- target: clean                     -->
+	<!-- ================================= -->
+	<target name="clean" description="--> clean up the classses for drips">
+		<delete dir="${build.dir}" />
+	</target>
+
+	<!-- ================================= -->
+	<!-- target: cleancompile              -->
+	<!-- ================================= -->
+	<target name="cleancompile" depends="init,clean,compile" description="--> clean classes and compile again" />
+
+</project>
+

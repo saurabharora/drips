@@ -1,0 +1,290 @@
+<?xml version="1.0"?>
+<!-- ======================================================================                                                   
+
+     drips-project    
+     Dynamic Rules based Instrumentation of Production Systems.
+                   
+     Saurabh Arora, Prasen Mukherjee
+     ====================================================================== -->
+<project name="drips-test-project" default="runalltests">
+	<description>
+            This Ant File contains the Task to Run testcases for Drips.
+    </description>
+
+	<property name="build.dir" location="target" />
+
+	<property name="classes.core" location="core\target\classes" />
+
+	<property name="classes.ext" location="extensions\target\classes" />
+
+	<property name="src.test" location="tests\src\main\java" />
+	
+	<property name="classes.test" location="tests\target\classes" />
+
+	<property name="classes.example" location="example\target\classes" />
+
+	<property name="reports.tests" location="reports" />
+	
+	<property name="aspectwerkz-jdk5" location="lib\aspectwerkz-jdk5-2.0.jar"/>
+ 
+
+
+
+	<path id="aw.classpath">
+		<fileset dir="lib">
+			<include name="*jdk5*.jar" />
+		</fileset>
+		<fileset dir="lib">
+			<include name="*.jar" />
+			<exclude name="jarjar*,*jdk14*.jar,*jdk5*.jar" />
+		</fileset>
+	</path>
+	<path id="dripsall.classpath">
+		<pathelement location="${classes.core}" />
+		<pathelement location="${classes.ext}" />
+		<pathelement location="${classes.example}" />
+		<pathelement location="${classes.test}" />
+	</path>
+
+
+	<!-- ================================= 
+          target: buildproject              
+         ================================= -->
+	<target name="buildproject" depends="init" description="--> Build Project">
+		<ant antfile="build.xml" target="build" inheritall="false">
+		</ant>
+		<!-- <antcall target="compile-tests" /> -->
+	</target>
+
+	<!-- ================================= -->
+	<!-- target: compile Tests             -->
+	<!-- ================================= -->
+	<target name="compile-tests" depends="init" description="Compilation of the Tests Code for drips">
+
+
+		<!-- Compile the tests-->
+		<echo>Compiling .. Files in ${src.test}</echo>
+		<javac srcdir="${src.test}" destdir="${classes.test}" debug="${debug}">
+			<classpath>
+				<path refid="aw.classpath" />
+				<path location="${classes.core}" />
+				<path location="${classes.ext}" />
+				<path location="${classes.example}" />
+			</classpath>
+
+		</javac>
+
+	</target>
+
+
+	<!-- ================================= -->
+	<!-- target: init                      -->
+	<!-- ================================= -->
+	<target name="init">
+	<!--	<condition property="jdk15">
+			<contains string="${java.version}" substring="1.5" />
+		</condition>
+		<fail message="Please use only jdk 1.5" unless="jdk15" />
+	 -->
+		<mkdir dir="${classes.test}" />
+		<mkdir dir="${reports.tests}" />
+	</target>
+
+
+	<!-- ================================= -->
+	<!-- target: clean                     -->
+	<!-- ================================= -->
+	<target name="clean" description="--> clean up the classses for drips">
+		<delete dir="${build.dir}" />
+		<delete dir="${reports.tests}" />
+	</target>
+
+
+
+	<!-- ====================================================  -->
+	<!-- target: standalone startWordCounterGUI application               -->
+	<!-- ====================================================  -->
+	<target name="startWCGUI" depends="compile-tests,init" description="--> Runs WordCounter in GUI mode, and waits for JMXClient to interact with drips mbeans">
+		<java fork="true" classname="com.bea.drips.example.wordcount.WordCounterGUI">
+			<jvmarg value="-javaagent:lib/aspectwerkz-jdk5-2.0.jar" />
+			<jvmarg value="-javaagent:${build.dir}/dripsagent.jar" />
+			<jvmarg value="-Daspectwerkz.definition.file=aop.xml" />
+			<!--
+            <jvmarg value="-Daspectwerkz.transform.verbose=true" />
+            <jvmarg value="-Daspectwerkz.transform.dump=*" />
+-->
+			<classpath>
+				<path refid="aw.classpath" />
+				<path location="${classes.core}" />
+				<path location="${classes.example}" />
+				<path location="${classes.test}" />
+			</classpath>
+		</java>
+	</target>
+
+	<!-- ================================= -->
+	<!-- target: runJMXClient              -->
+	<!-- ================================= -->
+	<target name="runJMXClient" depends="compile-tests,init" description="--> Runs JMXClient to interact with drips mbeans">
+		<java fork="true" classname="com.bea.drips.example.wordcount.JMXClient">
+			<classpath>
+				<path location="${classes.example}" />
+			</classpath>
+		</java>
+	</target>
+
+	<!-- ================================= -->
+	<!-- target:  Run All tests            -->
+	<!-- ================================= -->
+	<target name="runalltests" depends="compile-tests,init" description="--> Runs all the junit test.">
+
+		<!-- clean up the directory , if it contains previous runs -->
+
+		<delete>
+			<fileset dir="${reports.tests}">
+				<include name="**/*.xml,**/*.html" />
+
+			</fileset>
+		</delete>
+		<junit fork="yes" printsummary="yes">
+			<formatter type="xml" />
+			<jvmarg value="-javaagent:${build.dir}/dripsagent.jar" />
+			<jvmarg value="-javaagent:${aspectwerkz-jdk5}" />
+			<jvmarg value="-Ddrips.rmiregistry.notrequired=true" />
+			<!--
+                        <jvmarg value="-Xbootclasspath/p:.\lib\aspectwerkz-core-2.0.jar;.\lib\aspectwerkz-extensions-2.0.jar;.\lib\aspectwerkz-2.0.jar;.\lib\aspectwerkz-jdk5-2.0.jar;.\lib\dom4j-1.4.jar;.\lib\qdox-1.4.jar;.\lib\concurrent-1.3.1.jar;.\lib\trove-1.0.2.jar;.\lib\jrexx-1.1.1.jar" />
+                        <jvmarg value="-Daspectwerkz.home=." />
+            -->
+			<classpath>
+				<path refid="aw.classpath" />
+				<path refid="dripsall.classpath" />
+			</classpath>
+			<batchtest fork="yes" todir="${reports.tests}">
+				<fileset dir="${src.test}">
+					<include name="org/drips/**/Drips**Test.java" />
+					<exclude name="**/AllTests.java" />
+				</fileset>
+			</batchtest>
+
+		</junit>
+	</target>
+
+	<!-- ================================= -->
+	<!-- target:  runremotejvmtest         -->
+	<!-- ================================= -->
+	<target name="runremotejvmtest" depends="init">
+		<parallel failonany="true">
+
+			<!--
+			<java fork="true" classname="com.bea.drips.example.wordcount.WordCounterGUI">
+				<jvmarg value="-javaagent:lib\aspectwerkz-jdk5-2.0.jar" />
+				<jvmarg value="-javaagent:${build.dir}\dripsagent.jar" />
+				<classpath>
+					<path refid="aw.classpath" />
+					<path location="${classes.core}" />
+					<path location="${classes.example}" />
+				</classpath>
+			</java> 
+			-->
+			<sequential>
+				<echo message="Sleeping for 10 seconds for WordCounterGUI to intialize" />
+				<sleep seconds="2" />
+				<echo message="Running the tests" />
+				<junit fork="yes" printsummary="yes">
+					<formatter type="xml" />
+					<jvmarg value="-javaagent:lib\aspectwerkz-jdk5-2.0.jar" />
+					<jvmarg value="-Ddrips.remotejvmtest=true" />
+					<classpath>
+						<path refid="aw.classpath" />
+						<path location="${classes.core}" />
+						<path location="${classes.example}" />
+						<path location="${classes.test}" />
+					</classpath>
+					<batchtest fork="yes" todir="${reports.tests}">
+						<fileset dir="${src.test}">
+							<include name="com/bea/drips/**/Drips**Test.java" />
+							<exclude name="**/AllTests.java" />
+						</fileset>
+					</batchtest>
+				</junit>
+			</sequential>
+		</parallel>
+	</target>
+
+	<target name="timingaspecttest" depends="compile-tests,init">
+		<parallel failonany="true">
+			<antcall target="startWCGUI" />
+			<sequential>
+				<echo message="Sleeping for 5 seconds for WordCounterGUI to intialize" />
+				<sleep seconds="5" />
+				<junit fork="yes" printsummary="yes">
+					<formatter type="xml" />
+					<classpath>
+						<path refid="aw.classpath" />
+						<path location="${classes.core}" />
+						<path location="${classes.ext}" />
+						<path location="${classes.test}" />
+					</classpath>
+					<batchtest fork="yes" todir="${reports.tests}">
+						<fileset dir="${src.test}">
+							<include name="com/bea/drips/**/TimingAspectTest.java" />
+						</fileset>
+					</batchtest>
+				</junit>
+			</sequential>
+
+		</parallel>
+
+	</target>
+
+	<target name="helloworld" depends="compile-tests,init">
+		<java fork="true" classname="com.bea.drips.example.hello.HelloWorld">
+			<jvmarg value="-javaagent:lib\aspectwerkz-jdk5-2.0.jar" />
+			<jvmarg value="-javaagent:${build.dir}\dripsagent.jar" />
+			<jvmarg value="-Daspectwerkz.definition.file=src-example\com\bea\drips\example\hello\aop-hello.xml" />
+			<classpath>
+				<path refid="aw.classpath" />
+				<path location="${classes.core}" />
+				<path location="${classes.example}" />
+				<path location="${classes.test}" />
+			</classpath>
+		</java>
+
+	</target>
+
+	<target name="helloworldtest" depends="compile-tests,init">
+		<junit fork="yes" printsummary="yes">
+			<formatter type="xml" />
+			<jvmarg value="-javaagent:lib\aspectwerkz-jdk5-2.0.jar" />
+			<jvmarg value="-javaagent:${build.dir}\dripsagent.jar" />
+			<jvmarg value="-Daspectwerkz.definition.file=src-example\com\bea\drips\example\hello\aop-hello.xml" />
+			<jvmarg value="-Ddrips.remotejvmtest=true" />
+			<classpath>
+				<path refid="aw.classpath" />
+				<path location="${classes.core}" />
+				<path location="${classes.example}" />
+				<path location="${classes.test}" />
+			</classpath>
+			<batchtest fork="yes" todir="${reports.tests}">
+				<fileset dir="${src.test}">
+					<include name="com/bea/drips/test/example/hello/HelloWorldTest.java" />
+				</fileset>
+			</batchtest>
+		</junit>
+
+	</target>
+
+	<!-- ================================= -->
+	<!-- target:  junitreport              -->
+	<!-- ================================= -->
+	<target name="junitreport" depends="compile-tests,init" description="--> creates a junit html for junit runs">
+		<mkdir dir="${reports.tests}/html" />
+		<junitreport todir="${reports.tests}">
+			<fileset dir="${reports.tests}">
+				<include name="TEST-*.xml" />
+			</fileset>
+			<report format="frames" todir="${reports.tests}/html" />
+		</junitreport>
+	</target>
+</project>
+

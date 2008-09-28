@@ -1,0 +1,82 @@
+<project>
+ <parent>
+   <groupId>com.bea.drips</groupId>
+   <artifactId>base</artifactId>
+   <version>0.0.1-SNAPSHOT</version>
+  </parent>
+  
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.bea.drips</groupId>
+  <artifactId>drips-tests</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <description>This is the Drips framework Test</description>
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <source>1.5</source>
+          <target>1.5</target>
+        </configuration>
+      </plugin>
+      <plugin>
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-surefire-plugin</artifactId>
+      <configuration>
+ 		<skip>true</skip>
+      </configuration>
+    </plugin>
+    <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <executions>
+          <execution>
+            <id>test</id>
+            <phase>test</phase>
+            <configuration>
+              <tasks>
+                <ant antfile="build-test.xml" inheritRefs="true" dir=".." >
+                  <target name="buildproject"/>
+                  <target name="runalltests"/>                  
+                  <target name="junitreport"/>                  
+                </ant>
+              </tasks>
+            </configuration>
+            <goals>
+              <goal>run</goal>
+            </goals>
+          </execution>
+        </executions>
+        <dependencies>
+          <dependency>
+            <groupId>ant</groupId>
+            <artifactId>ant-junit</artifactId>
+            <version>1.6.5</version>
+          </dependency>
+          <dependency>
+		    <groupId>junit</groupId>
+	        <artifactId>junit</artifactId>
+     		<version>3.8.1</version>
+          </dependency>
+          <dependency>
+		    <groupId>xalan</groupId>
+	        <artifactId>xalan</artifactId>
+     		<version>2.7.0</version>
+          </dependency>
+        </dependencies>
+      </plugin>
+    </plugins>
+  </build>
+  <dependencies>
+    <dependency>
+		<groupId>com.bea.drips</groupId>
+		<artifactId>drips-examples</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+    </dependency>
+    <dependency>
+		    <groupId>junit</groupId>
+	        <artifactId>junit</artifactId>
+     		<version>3.8.1</version>
+     </dependency>
+  </dependencies>
+</project>

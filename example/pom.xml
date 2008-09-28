@@ -1,0 +1,31 @@
+<project>
+ <parent>
+   <groupId>com.bea.drips</groupId>
+   <artifactId>base</artifactId>
+   <version>0.0.1-SNAPSHOT</version>
+  </parent>
+  
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>com.bea.drips</groupId>
+  <artifactId>drips-examples</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <description>This is the Drips framework Examples</description>
+  <build>
+    <plugins>
+      <plugin>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <configuration>
+          <source>1.5</source>
+          <target>1.5</target>
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
+  <dependencies>
+    <dependency>
+		<groupId>com.bea.drips</groupId>
+		<artifactId>drips-ext</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+    </dependency>
+  </dependencies>
+</project>
